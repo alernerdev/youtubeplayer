@@ -1,3 +1,5 @@
+import _ from "lodash";
+
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import YoutubeSearch from "youtube-api-search";
@@ -12,31 +14,40 @@ class App extends Component {
     constructor(props) {
         super(props);
 
-        this.state = { 
-            videos: [], 
-            selectedVideo: null 
+        this.state = {
+            videos: [],
+            selectedVideo: null
         };
 
+        this.videoSearch('flamenco');
+    }
+
+    videoSearch(term) {
         YoutubeSearch(
-            { key: YOUTUBE_API_KEY, term: 'flamenco' },
+            { key: YOUTUBE_API_KEY, term: term },
             (videos) => {
-                this.setState({ 
-                    videos: videos,  
+                this.setState({
+                    videos: videos,
                     selectedVideo: videos[0]
                 });
             }
         );
+
     }
 
+    /* videolist takes a callback so that we are notified when selection changed */
+    /* searchbar takes a callback so that we are notified when typed input changes */
     render() {
-        /* videolist takes a callback so that we are notified when selection changed*/
+        /* debounce delays the callback a bit */
+        const videoSearch = _.debounce( (term) => {this.videoSearch(term)}, 400 ); // in milliseconds
+
         return (
             <div>
-                <SearchBar />
+                <SearchBar onSearchTermChange={ videoSearch }/>
                 <VideoDetail video={this.state.selectedVideo} />
-                <VideoList 
-                    videos={this.state.videos} 
-                    onVideoSelect={(selectedVideo) => this.setState({selectedVideo})}
+                <VideoList
+                    videos={this.state.videos}
+                    onVideoSelect={ (selectedVideo) => this.setState({ selectedVideo }) }
                 />
             </div>
         );
